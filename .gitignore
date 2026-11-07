@@ -1,0 +1,10 @@
+/target
+
+# Screenshots are generated locally; keep only the ones used by README.md.
+/shots/*.png
+!/shots/lighting-ru.png
+!/shots/keys.png
+!/shots/device-ru.png
+
+*.swp
+.DS_Store

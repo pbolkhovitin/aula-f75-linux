@@ -1,0 +1,1003 @@
+{
+  "version": 1,
+  "values": [
+    {
+      "name": "key count",
+      "group": "layout",
+      "value": 80,
+      "unit": "keys",
+      "source": "KB.ini [KEY] K1..K80"
+    },
+    {
+      "name": "volume wheel",
+      "group": "layout",
+      "value": true,
+      "source": "KB.ini [KEY] K81 type 0x09 usage 0x0700001D"
+    },
+    {
+      "name": "LED count",
+      "group": "layout",
+      "value": 90,
+      "unit": "LEDs",
+      "source": "KB.ini [KEY] LED index 0..89"
+    },
+    {
+      "name": "matrix length",
+      "group": "protocol",
+      "value": 128,
+      "unit": "key slots",
+      "source": "KB.ini MatrixLen=128, stored at devState+0x2ff8; FUN_00489080 walks the LED groups with the key count at devState+0x2d28 (80), not MatrixLen"
+    },
+    {
+      "name": "macro buffer",
+      "group": "macros",
+      "value": 4096,
+      "unit": "bytes",
+      "source": "FUN_00410A70 MacroBufferSize default 0x1000"
+    },
+    {
+      "name": "macro chunk size",
+      "group": "macros",
+      "value": 1024,
+      "unit": "bytes",
+      "source": "FUN_00489080 uses 0x400 buffers via FUN_004881F0"
+    },
+    {
+      "name": "macro command ids",
+      "group": "macros",
+      "value": "0xDC,0xE0,0xE4,0xE8",
+      "source": "FUN_00489080 macro upload ids"
+    },
+    {
+      "name": "firmware",
+      "group": "device",
+      "value": 24,
+      "source": "KB.ini Fw=24"
+    },
+    {
+      "name": "wired vendor id",
+      "group": "device",
+      "value": "0x258A",
+      "source": "KB.ini VID=0x258a"
+    },
+    {
+      "name": "wired product id",
+      "group": "device",
+      "value": "0x010C",
+      "source": "KB.ini PID=0x010C"
+    },
+    {
+      "name": "wireless vendor id",
+      "group": "device",
+      "value": "0x3554",
+      "source": "KB.ini VID_Wireless=0x3554"
+    },
+    {
+      "name": "wireless product id",
+      "group": "device",
+      "value": "0xFA09",
+      "source": "KB.ini PID_Wireless=0xfa09"
+    },
+    {
+      "name": "prefix",
+      "group": "device",
+      "value": "F75 KR",
+      "source": "KB.ini ShortName"
+    },
+    {
+      "name": "channels",
+      "group": "device",
+      "value": 3,
+      "source": "KB.ini ChannelMask=3"
+    },
+    {
+      "name": "sleep time",
+      "group": "power",
+      "value": 300,
+      "unit": "s",
+      "source": "KB.ini SleepTime=300; parser default 0x78=120"
+    },
+    {
+      "name": "sleep divisor",
+      "group": "power",
+      "value": 30,
+      "unit": "s per device unit",
+      "source": "FUN_00410A70 divides UI seconds by 0x1e"
+    },
+    {
+      "name": "sleep choices",
+      "group": "power",
+      "value": "60,90,120,180,240,300,600,900,1200",
+      "unit": "s",
+      "source": "KB.ini SleepUI"
+    },
+    {
+      "name": "sleep device units",
+      "group": "power",
+      "value": "2,3,4,6,8,10,20,30,40",
+      "source": "KB.ini SleepHW"
+    },
+    {
+      "name": "built-in sleep choices",
+      "group": "power",
+      "value": "30,60,90,120,180,240,300,600,900,1200",
+      "unit": "s",
+      "source": "FUN_00410A70 fallback when SleepUI is absent"
+    },
+    {
+      "name": "battery display",
+      "group": "power",
+      "value": false,
+      "source": "KB.ini ShowPower=0"
+    },
+    {
+      "name": "speed levels",
+      "group": "lighting",
+      "value": 5,
+      "unit": "levels",
+      "source": "KB.ini Speed=0,1,2,3,4; parser default count 4"
+    },
+    {
+      "name": "brightness levels",
+      "group": "lighting",
+      "value": 10,
+      "unit": "levels",
+      "source": "KB.ini Light=0..9; parser default count 20"
+    },
+    {
+      "name": "default brightness",
+      "group": "lighting",
+      "value": 7,
+      "unit": "0-based level",
+      "estimated": true,
+      "source": "UI product default; parser LedParam default would use nLightNum-1"
+    },
+    {
+      "name": "default speed",
+      "group": "lighting",
+      "value": 2,
+      "unit": "0-based level",
+      "estimated": true,
+      "source": "UI product default; parser LedParam default would use (nSpeedNum-1)*16|7"
+    },
+    {
+      "name": "default effect",
+      "group": "lighting",
+      "value": "Neon stream",
+      "source": "KB.ini DefLedIndex=10, 0-based list index"
+    },
+    {
+      "name": "effect count",
+      "group": "lighting",
+      "value": 20,
+      "source": "KB.ini LedOpt1..LedOpt20"
+    },
+    {
+      "name": "effect slots parsed",
+      "group": "lighting",
+      "value": 24,
+      "source": "FUN_00410A70 parses LedOpt1..LedOpt24 into 0x28-byte records at devState+0x3034"
+    },
+    {
+      "name": "RGB order",
+      "group": "lighting",
+      "value": "R,G,B",
+      "source": "KB.ini RGBIndex=0,1,2"
+    },
+    {
+      "name": "RGB fallback",
+      "group": "lighting",
+      "value": "2,1,0",
+      "source": "FUN_00410A70 writes reversed order when RGBIndex/GameRGBIndex are absent"
+    },
+    {
+      "name": "LED mask",
+      "group": "lighting",
+      "value": "0x22120",
+      "source": "KB.ini LedMask"
+    },
+    {
+      "name": "direction order",
+      "group": "lighting",
+      "value": "left,right,up,down",
+      "estimated": true
+    },
+    {
+      "name": "default colour",
+      "group": "lighting",
+      "value": "10,147,255",
+      "source": "FUN_00410A70 clrKeyHasFunc default 0x1D45E8"
+    },
+    {
+      "name": "debounce stages",
+      "group": "typing",
+      "value": "1,2,4,8",
+      "unit": "ms",
+      "estimated": true
+    },
+    {
+      "name": "debounce packed",
+      "group": "typing",
+      "value": "0x04000101",
+      "source": "KB.ini ShowDebounce; FUN_00410A70 stores only the packed value"
+    },
+    {
+      "name": "debounce default",
+      "group": "typing",
+      "value": 2,
+      "unit": "ms",
+      "estimated": true
+    },
+    {
+      "name": "debounce lists",
+      "group": "typing",
+      "value": "discarded",
+      "source": "FUN_00410A70 parses DebounceUI/DebounceHW with FUN_00460A70 but has no storage for them"
+    },
+    {
+      "name": "music modes",
+      "group": "music",
+      "value": 11,
+      "unit": "modes",
+      "source": "text.xml music mode labels"
+    },
+    {
+      "name": "key categories",
+      "group": "keys",
+      "value": 6,
+      "unit": "categories",
+      "source": "text.xml key assignment categories"
+    },
+    {
+      "name": "local profile slots",
+      "group": "profiles",
+      "value": 5,
+      "unit": "slots",
+      "estimated": true
+    },
+    {
+      "name": "feature report id",
+      "group": "protocol",
+      "value": 9,
+      "source": "FUN_00490680 / FUN_004879F0"
+    },
+    {
+      "name": "feature report size",
+      "group": "protocol",
+      "value": 520,
+      "unit": "bytes",
+      "source": "FUN_00490680 buffer 0x208"
+    },
+    {
+      "name": "config command",
+      "group": "protocol",
+      "value": 5,
+      "source": "FUN_00490680 header byte [2]"
+    },
+    {
+      "name": "checksum",
+      "group": "protocol",
+      "value": "low byte of sum of bytes 2..0x207",
+      "source": "FUN_00490680"
+    },
+    {
+      "name": "config length endianness",
+      "group": "protocol",
+      "value": "little-endian",
+      "source": "FUN_00490680 stores low byte at [6], high at [7]"
+    },
+    {
+      "name": "config payload bytes",
+      "group": "protocol",
+      "value": 6,
+      "source": "FUN_00490680 sends the 6-byte payload in one 0x208 frame: [5]=chunk index 0, [6..7]=6,0"
+    },
+    {
+      "name": "config start delay",
+      "group": "protocol",
+      "value": 20,
+      "unit": "ms",
+      "source": "FUN_00490680 calls FUN_00405100(0x14), a QueryPerformanceCounter busy-wait in milliseconds; the real pre-send delay is 20 ms"
+    },
+    {
+      "name": "config retry delay",
+      "group": "protocol",
+      "value": 60,
+      "unit": "ms",
+      "source": "FUN_00490680 Sleep(0x3c)"
+    },
+    {
+      "name": "RGB table delay",
+      "group": "protocol",
+      "value": 100,
+      "unit": "ms",
+      "source": "FUN_00489080 Sleep(0x64) only after SetLedRgbTab (compressed RGB table); it is not a profile-save delay"
+    },
+    {
+      "name": "LED matrix command",
+      "group": "protocol",
+      "value": "0xBC",
+      "source": "FUN_00489080 caller of FUN_00487DA0"
+    },
+    {
+      "name": "LED colour command",
+      "group": "protocol",
+      "value": "0xC0",
+      "source": "FUN_00489080 caller of FUN_00487DA0"
+    },
+    {
+      "name": "LED settle delay",
+      "group": "protocol",
+      "value": 50,
+      "unit": "ms",
+      "source": "FUN_00489080 Sleep(0x32) after FUN_00487DA0(0xBC) and after FUN_00487DA0(0xC0)"
+    },
+    {
+      "name": "LED retry delay",
+      "group": "protocol",
+      "value": 200,
+      "unit": "ms",
+      "source": "FUN_004879F0 retry loop"
+    },
+    {
+      "name": "LED matrix size",
+      "group": "protocol",
+      "value": 1890,
+      "unit": "bytes",
+      "source": "FUN_00489080 0x762 colour matrix (5 groups of 0x17a)"
+    },
+    {
+      "name": "LED colour group size",
+      "group": "protocol",
+      "value": 378,
+      "unit": "bytes",
+      "source": "FUN_00489080 0x17a per group, three 0x7e planes"
+    },
+    {
+      "name": "LED colour groups used",
+      "group": "protocol",
+      "value": 1,
+      "source": "KB.ini GaoshouGroupNum=1"
+    },
+    {
+      "name": "LED colour plane size",
+      "group": "protocol",
+      "value": 126,
+      "unit": "bytes",
+      "source": "FUN_00489080 three 0x7e planes per group"
+    },
+    {
+      "name": "LED key index offset",
+      "group": "protocol",
+      "value": "0x0d",
+      "source": "FUN_00489080 reads the LED index from the key record at +0xd"
+    },
+    {
+      "name": "per-key colour table",
+      "group": "protocol",
+      "value": "devState+0x912 + keyIndex*4",
+      "source": "FUN_00489080 32-bit colour per key"
+    },
+    {
+      "name": "LED payload buffer",
+      "group": "protocol",
+      "value": 1024,
+      "unit": "bytes",
+      "source": "FUN_00487DA0 0x400 payload buffer"
+    },
+    {
+      "name": "LED feature report id",
+      "group": "protocol",
+      "value": 6,
+      "source": "FUN_004879F0 prepends report id 6"
+    },
+    {
+      "name": "LED feature report size",
+      "group": "protocol",
+      "value": 1032,
+      "unit": "bytes",
+      "source": "FUN_00487DA0 8 header bytes + 1024 payload"
+    },
+    {
+      "name": "LED header",
+      "group": "protocol",
+      "value": "09 <cmd> 00 40 00 00 00",
+      "source": "FUN_00487DA0 header bytes"
+    },
+    {
+      "name": "effect 1 hardware id",
+      "group": "lighting",
+      "value": 1,
+      "source": "KB.ini LedOpt1 (Fixed on)"
+    },
+    {
+      "name": "effect 2 hardware id",
+      "group": "lighting",
+      "value": 3,
+      "source": "KB.ini LedOpt2 (Respire)"
+    },
+    {
+      "name": "effect 3 hardware id",
+      "group": "lighting",
+      "value": 2,
+      "source": "KB.ini LedOpt3 (Rainbow)"
+    },
+    {
+      "name": "effect 4 hardware id",
+      "group": "lighting",
+      "value": 19,
+      "source": "KB.ini LedOpt4 (Flash away)"
+    },
+    {
+      "name": "effect 5 hardware id",
+      "group": "lighting",
+      "value": 15,
+      "source": "KB.ini LedOpt5 (Raindrops)"
+    },
+    {
+      "name": "effect 6 hardware id",
+      "group": "lighting",
+      "value": 13,
+      "source": "KB.ini LedOpt6 (Rainbow wheel)"
+    },
+    {
+      "name": "effect 7 hardware id",
+      "group": "lighting",
+      "value": 20,
+      "source": "KB.ini LedOpt7 (Ripples shining)"
+    },
+    {
+      "name": "effect 8 hardware id",
+      "group": "lighting",
+      "value": 16,
+      "source": "KB.ini LedOpt8 (Stars twinkle)"
+    },
+    {
+      "name": "effect 9 hardware id",
+      "group": "lighting",
+      "value": 18,
+      "source": "KB.ini LedOpt9 (Shadow disappear)"
+    },
+    {
+      "name": "effect 10 hardware id",
+      "group": "lighting",
+      "value": 5,
+      "source": "KB.ini LedOpt10 (Retro snake)"
+    },
+    {
+      "name": "effect 11 hardware id",
+      "group": "lighting",
+      "value": 7,
+      "source": "KB.ini LedOpt11 (Neon stream)"
+    },
+    {
+      "name": "effect 12 hardware id",
+      "group": "lighting",
+      "value": 17,
+      "source": "KB.ini LedOpt12 (Reaction)"
+    },
+    {
+      "name": "effect 13 hardware id",
+      "group": "lighting",
+      "value": 12,
+      "source": "KB.ini LedOpt13 (Sine wave)"
+    },
+    {
+      "name": "effect 14 hardware id",
+      "group": "lighting",
+      "value": 8,
+      "source": "KB.ini LedOpt14 (Retinue scanning)"
+    },
+    {
+      "name": "effect 15 hardware id",
+      "group": "lighting",
+      "value": 28,
+      "source": "KB.ini LedOpt15 (Rotating windmill)"
+    },
+    {
+      "name": "effect 16 hardware id",
+      "group": "lighting",
+      "value": 30,
+      "source": "KB.ini LedOpt16 (Colorful waterfall)"
+    },
+    {
+      "name": "effect 17 hardware id",
+      "group": "lighting",
+      "value": 14,
+      "source": "KB.ini LedOpt17 (Blossoming)"
+    },
+    {
+      "name": "effect 18 hardware id",
+      "group": "lighting",
+      "value": 29,
+      "source": "KB.ini LedOpt18 (Rotating storm)"
+    },
+    {
+      "name": "effect 19 hardware id",
+      "group": "lighting",
+      "value": 0,
+      "source": "KB.ini LedOpt19 raw 21,0,0,0,0,0,0 (UI label Self-define)"
+    },
+    {
+      "name": "effect 20 hardware id",
+      "group": "lighting",
+      "value": 0,
+      "source": "KB.ini LedOpt20 raw 0,0,0,0,0,0,0 (UI label Off)"
+    },
+    {
+      "name": "profile length",
+      "group": "transport",
+      "value": 254,
+      "source": "FUN_00487CB0 / FUN_00487C10"
+    },
+    {
+      "name": "profile save command",
+      "group": "transport",
+      "value": "0x03",
+      "source": "FUN_00487C10"
+    },
+    {
+      "name": "profile read command",
+      "group": "transport",
+      "value": "0x83",
+      "source": "FUN_00487CB0"
+    },
+    {
+      "name": "profile tag",
+      "group": "transport",
+      "value": "0xB6",
+      "source": "FUN_00487CB0 / FUN_00487C10"
+    },
+    {
+      "name": "profile read delay",
+      "group": "transport",
+      "value": 700,
+      "source": "FUN_00487CB0 (param+0x294)",
+      "unit": "ms",
+      "estimated": true
+    },
+    {
+      "name": "profile save delay",
+      "group": "transport",
+      "value": 30,
+      "source": "FUN_00489080 Sleep(0x1e) before FUN_00487C10; 100 ms belongs to the RGB-table path only",
+      "unit": "ms"
+    },
+    {
+      "name": "profile effect offset",
+      "group": "transport",
+      "value": 5,
+      "source": "FUN_00488FA0"
+    },
+    {
+      "name": "profile custom flag offset",
+      "group": "transport",
+      "value": 4,
+      "source": "FUN_00488FA0 byte 4 = (GaoshouIndex == selected LedOpt index), not a generic custom flag"
+    },
+    {
+      "name": "profile sentinel value",
+      "group": "transport",
+      "value": 255,
+      "source": "FUN_00488FA0 bytes 0x14/0x15"
+    },
+    {
+      "name": "LED matrix first chunk",
+      "group": "lighting",
+      "value": 1024,
+      "source": "FUN_00489080: first 0x09 frame starts at matrix[0], second at matrix+0x400 (0x4897a5/0x4897eb)"
+    },
+    {
+      "name": "LED plane size",
+      "group": "lighting",
+      "value": 126,
+      "source": "FUN_00487DA0 / GameRGBIndex"
+    },
+    {
+      "name": "LED matrix chunk delay",
+      "group": "lighting",
+      "value": 50,
+      "source": "FUN_00489080",
+      "unit": "ms"
+    },
+    {
+      "name": "effect written to device",
+      "group": "lighting",
+      "value": true,
+      "source": "FUN_00488FA0 profile byte 5"
+    },
+    {
+      "name": "per-key colours written to device",
+      "group": "lighting",
+      "value": true,
+      "source": "FUN_00487DA0 two 1024-byte chunks"
+    },
+    {
+      "name": "brightness written to device",
+      "group": "lighting",
+      "value": true,
+      "source": "FUN_00488FA0 writes 2 bytes per key at profile+0x16: byte 1 = (brightness << 4) | speed; byte 0 = direction or RandomVal=7"
+    },
+    {
+      "name": "speed written to device",
+      "group": "lighting",
+      "value": true,
+      "source": "FUN_00488FA0 writes 2 bytes per key at profile+0x16: byte 1 = (brightness << 4) | speed; byte 0 = direction or RandomVal=7"
+    },
+    {
+      "name": "direction written to device",
+      "group": "lighting",
+      "value": true,
+      "source": "FUN_00488FA0 writes 2 bytes per key at profile+0x16: byte 1 = (brightness << 4) | speed; byte 0 = direction or RandomVal=7"
+    },
+    {
+      "name": "random colour written to device",
+      "group": "lighting",
+      "value": true,
+      "source": "FUN_00488FA0 writes 2 bytes per key at profile+0x16: byte 1 = (brightness << 4) | speed; byte 0 = direction or RandomVal=7"
+    },
+    {
+      "name": "apply mode",
+      "group": "controls",
+      "value": "explicit Apply button",
+      "source": "Cfg.ini ApplyNow=0 / text.xml tc_apply"
+    },
+    {
+      "name": "Windows mode shortcut",
+      "group": "controls",
+      "value": "FN+W",
+      "source": "text.xml tc_tap_tips"
+    },
+    {
+      "name": "key down colour",
+      "group": "lighting",
+      "value": "255,0,0",
+      "source": "KB.ini clrKeyDn=255,0,0; FUN_00410A70 fallback is 0xFFFFFF"
+    },
+    {
+      "name": "game RGB index",
+      "group": "protocol",
+      "value": "0,1,2",
+      "source": "KB.ini GameRGBIndex; FUN_00489080 planes at devState+0x2fff..0x3001"
+    },
+    {
+      "name": "gaoshou index",
+      "group": "lighting",
+      "value": 18,
+      "source": "KB.ini GaoshouIndex=18; FUN_00488FA0 compares it with the selected index"
+    },
+    {
+      "name": "start group",
+      "group": "protocol",
+      "value": 32,
+      "source": "FUN_00410A70 StartGp default 0x20; FUN_00488FA0 writes StartGp + group offset to profile byte 6"
+    },
+    {
+      "name": "LED group pre-delay",
+      "group": "protocol",
+      "value": 30,
+      "source": "FUN_00489080 Sleep(0x1e) before each 0xBC/0xC0 pair"
+    },
+    {
+      "name": "config chunk size",
+      "group": "protocol",
+      "value": 512,
+      "source": "FUN_00490680 caps each payload chunk at 0x200 bytes"
+    },
+    {
+      "name": "key matrix command",
+      "group": "protocol",
+      "value": "0x04,0xD4",
+      "source": "FUN_00487E60 header 04 D4 00 40 00 00 00 + 1024 bytes"
+    },
+    {
+      "name": "macro frame command",
+      "group": "macros",
+      "value": 5,
+      "source": "FUN_004881F0 header 05 <id> 00 40 00 00 00 + 1024 bytes"
+    },
+    {
+      "name": "profile group byte offset",
+      "group": "protocol",
+      "value": 6,
+      "source": "FUN_00488FA0 byte 6 = StartGp + group offset"
+    },
+    {
+      "name": "profile key map offset",
+      "group": "transport",
+      "value": 22,
+      "source": "FUN_00488FA0: per-key table starts at profile+0x16"
+    },
+    {
+      "name": "profile key map stride",
+      "group": "transport",
+      "value": 2,
+      "unit": "bytes",
+      "source": "FUN_00488FA0: two bytes per key record"
+    },
+    {
+      "name": "profile key map count",
+      "group": "transport",
+      "value": 80,
+      "unit": "keys",
+      "source": "FUN_00488FA0 loops devState+0x2ff5 key records; the F75 profile has 80"
+    },
+    {
+      "name": "profile key brightness shift",
+      "group": "transport",
+      "value": 4,
+      "source": "FUN_00488FA0 byte 1 = (lightUI << 4) | (speedUI & 0x0F)"
+    },
+    {
+      "name": "profile key direction mask",
+      "group": "transport",
+      "value": "0x0F",
+      "source": "FUN_00488FA0 masks the direction byte when the LedOpt record supports direction"
+    },
+    {
+      "name": "profile key up flag",
+      "group": "transport",
+      "value": "0x80",
+      "source": "FUN_00488FA0 sets bit 7 on the direction byte when direction == 2"
+    },
+    {
+      "name": "profile random value",
+      "group": "transport",
+      "value": 7,
+      "source": "FUN_00410A70 RandomVal default 7; FUN_00488FA0 uses it when a key has random colour"
+    },
+    {
+      "name": "apply settle delay",
+      "group": "transport",
+      "value": 500,
+      "unit": "ms",
+      "source": "FUN_00489080 Sleep(500) at the end of ApplySetting"
+    },
+    {
+      "name": "LED color table delay",
+      "group": "lighting",
+      "value": 100,
+      "unit": "ms",
+      "source": "FUN_00489080 sleeps 0x64 after SetLedRgbTab, not after a profile save"
+    },
+    {
+      "name": "udev node mode",
+      "group": "linux-access",
+      "value": "0660",
+      "source": "observed /dev/hidraw5 and hidraw6: crw-rw---- root root"
+    },
+    {
+      "name": "udev rule needs the user group",
+      "group": "linux-access",
+      "value": true,
+      "source": "getfacl showed no user ACL although TAGS=:uaccess:; MODE 0660 + group root denied access"
+    },
+    {
+      "name": "permission fix uses pkexec",
+      "group": "linux-access",
+      "value": true,
+      "source": "device::install_with_pkexec runs the saved rule script through pkexec"
+    },
+    {
+      "name": "receiver feature read length",
+      "group": "transport",
+      "value": 1032,
+      "unit": "bytes",
+      "source": "HIDIOCGFEATURE report 6 on /dev/hidraw6 returned 1032 bytes"
+    },
+    {
+      "name": "receiver settings request timeout",
+      "group": "transport",
+      "value": 5100,
+      "unit": "ms",
+      "source": "HIDIOCSFEATURE [06 83 B6] failed with ETIMEDOUT (os error 110) after ~5.1 s"
+    },
+    {
+      "name": "apply runs on a worker thread",
+      "group": "transport",
+      "value": true,
+      "source": "device::spawn_apply; UiState::poll_jobs"
+    },
+    {
+      "name": "udev rule file number",
+      "group": "linux-access",
+      "value": 70,
+      "source": "uevent ACL is scheduled by 73-seat-late.rules, so the rule must be read before it"
+    },
+    {
+      "name": "legacy udev rule removed",
+      "group": "linux-access",
+      "value": "/etc/udev/rules.d/99-f75.rules",
+      "source": "install script removes the old 99- rule that ran after 73-seat-late.rules"
+    },
+    {
+      "name": "key matrix bytes",
+      "group": "key-matrix",
+      "value": 1024,
+      "unit": "bytes",
+      "source": "FUN_00487E60 copies 0x100 dwords; FUN_00487F20 copies 0x100 dwords back"
+    },
+    {
+      "name": "key matrix slots",
+      "group": "key-matrix",
+      "value": 132,
+      "unit": "slots",
+      "source": "FUN_00488C50 loops nMatrixNum=0x84 and rejects index > 0x83"
+    },
+    {
+      "name": "key matrix read command",
+      "group": "key-matrix",
+      "value": "0x84 0xD4 00 00 00 00",
+      "source": "FUN_00487F20 request bytes before report id 6"
+    },
+    {
+      "name": "key matrix write command",
+      "group": "key-matrix",
+      "value": "0x04 0xD4 00 40 00 00 00",
+      "source": "FUN_00487E60 request bytes before report id 6"
+    },
+    {
+      "name": "key matrix macro byte offset",
+      "group": "key-matrix",
+      "value": 3,
+      "unit": "byte",
+      "source": "FUN_00488C50 writes macro_id-1 into the high byte of the slot dword"
+    },
+    {
+      "name": "macro name limit",
+      "group": "macros",
+      "value": 30,
+      "unit": "UTF-16 units",
+      "source": "FUN_0048CF00 _wcsnlen(name, 0x1e)"
+    },
+    {
+      "name": "macro action record",
+      "group": "macros",
+      "value": 4,
+      "unit": "bytes",
+      "source": "FUN_0048CF00 emits byte0 type/high value, byte1/2 value, byte3 HID"
+    },
+    {
+      "name": "macro index entry",
+      "group": "macros",
+      "value": 4,
+      "unit": "bytes",
+      "source": "FUN_0048D2D0 table of (offset:u16, size:u16), each shifted by 4*macro_count"
+    },
+    {
+      "name": "macro maximum id",
+      "group": "macros",
+      "value": 32,
+      "source": "FUN_00488C50 accepts buffer ids 1..0x20"
+    },
+    {
+      "name": "macro time field",
+      "group": "macros",
+      "value": 20,
+      "unit": "bits",
+      "source": "FUN_0048CF00 caps the action value at 0xFFFFF and stores it in byte0 low nibble + byte1 + byte2"
+    },
+    {
+      "name": "macro key-down bit",
+      "group": "macros",
+      "value": "0x80",
+      "source": "FUN_0048CF00 sets bit 7 when the action flag word at +2 is zero (key down)"
+    },
+    {
+      "name": "VK to HID table entries",
+      "group": "macros",
+      "value": 115,
+      "source": "FUN_0048CF00 linear search of 0x73 pairs at VA 0x607290"
+    },
+    {
+      "name": "log file name",
+      "group": "logging",
+      "value": "Log.txt",
+      "source": "FUN_00407770 builds \"%s\\Log.txt\" with SHGetSpecialFolderPathW/A (nFolder 0)"
+    },
+    {
+      "name": "log folder",
+      "group": "logging",
+      "value": "desktop",
+      "source": "FUN_00407770: SHGetSpecialFolderPath(NULL, buf, 0, 0), so the vendor log sits in the desktop folder"
+    },
+    {
+      "name": "debug level default",
+      "group": "logging",
+      "value": 0,
+      "source": "Cfg.ini [OPT] Debug=0 read by FUN_0040E2D0; 0 means logging off"
+    },
+    {
+      "name": "UI debug default",
+      "group": "logging",
+      "value": 0,
+      "source": "Cfg.ini [OPT] UIDebug defaults to 0 in FUN_0040E2D0; the shipped file omits the key"
+    },
+    {
+      "name": "log file threshold",
+      "group": "logging",
+      "value": 2,
+      "source": "FUN_00407770 switches from OutputDebugString to file writers when Debug > 1"
+    },
+    {
+      "name": "log truncates at start",
+      "group": "logging",
+      "value": true,
+      "source": "FUN_00407770 opens Log.txt with mode \"w\" once per launch"
+    },
+    {
+      "name": "log file mode",
+      "group": "logging",
+      "value": "append each line",
+      "source": "FUN_00407580/FUN_004076C0 open with \"a\", write one line and close on every call"
+    },
+    {
+      "name": "log timestamp format",
+      "group": "logging",
+      "value": "MM:SS.mmm",
+      "source": "format string \"\\n%02u:%02u.%03u   \" at 0x5FAAC0 (wide) and 0x5FAB08 (ANSI)"
+    },
+    {
+      "name": "log newline prefix",
+      "group": "logging",
+      "value": "\n",
+      "source": "FUN_00407580 writes the string at 0x5FAAC0 before the time, so every entry starts on a new line"
+    },
+    {
+      "name": "debug output prefix",
+      "group": "logging",
+      "value": "BY  ",
+      "source": "FUN_004074F0 and FUN_00407630 prepend \"BY  \" before OutputDebugStringW/A"
+    },
+    {
+      "name": "logged apply errors",
+      "group": "logging",
+      "value": "SetMacroData error, SetKeyMatrix error, SetLedRgbTab error, SetProfile error",
+      "source": "0x60E5A0, 0x60E658, 0x60E6F4, 0x60E7C8; called from FUN_00489080"
+    },
+    {
+      "name": "Linux log path",
+      "group": "logging",
+      "value": "~/.config/f75-control/Log.txt",
+      "estimated": true,
+      "source": "Linux mapping of the vendor desktop\\Log.txt; the file name is recovered, the folder is our choice"
+    },
+    {
+      "name": "in-memory log capacity",
+      "group": "logging",
+      "value": 2000,
+      "unit": "lines",
+      "estimated": true,
+      "source": "app ring buffer; the vendor keeps no in-memory history"
+    },
+    {
+      "name": "log rotation size",
+      "group": "logging",
+      "value": 1048576,
+      "unit": "bytes",
+      "estimated": true,
+      "source": "app limit before Log.1.txt; the vendor truncates and never rotates"
+    },
+    {
+      "name": "rotated log name",
+      "group": "logging",
+      "value": "Log.1.txt",
+      "estimated": true,
+      "source": "app rotation name; not present in OemDrv.exe"
+    },
+    {
+      "name": "default log level",
+      "group": "logging",
+      "value": 2,
+      "estimated": true,
+      "source": "app default (errors, warnings and info); the vendor default is Debug=0, logging off"
+    },
+    {
+      "name": "log level count",
+      "group": "logging",
+      "value": 4,
+      "estimated": true,
+      "source": "app levels Off/Errors/Normal/Debug; the vendor has Debug=0, 1 and >1"
+    }
+  ]
+}

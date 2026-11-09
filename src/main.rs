@@ -664,7 +664,15 @@ fn update_autostart(enabled: bool) {
         let exe = std::env::current_exe()
             .map(|p| p.display().to_string())
             .unwrap_or_else(|_| "f75-control".into());
-        let entry = format!("[Desktop Entry]\nType=Application\nName=F75 Control Center\nExec={exe}\nX-GNOME-Autostart-enabled=true\n");
+        // Desktop-entry Exec is a single field: a path with spaces must be
+        // quoted, and `%` is a field-code prefix, so it is doubled.
+        let exec = format!(
+            "\"{}\"",
+            exe.replace('\\', "\\\\")
+                .replace('"', "\\\"")
+                .replace('%', "%%")
+        );
+        let entry = format!("[Desktop Entry]\nType=Application\nName=F75 Control Center\nExec={exec}\nX-GNOME-Autostart-enabled=true\n");
         if let Some(parent) = path.parent() {
             let _ = std::fs::create_dir_all(parent);
         }

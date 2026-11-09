@@ -34,7 +34,6 @@ impl Level {
             Level::Debug => "DEBUG",
         }
     }
-
 }
 
 #[derive(Clone)]
@@ -47,12 +46,7 @@ pub struct Entry {
 
 impl Entry {
     pub fn line(&self) -> String {
-        format_line(
-            &self.at,
-            self.level,
-            &self.module,
-            self.message.as_str(),
-        )
+        format_line(&self.at, self.level, &self.module, self.message.as_str())
     }
 }
 
@@ -327,7 +321,11 @@ pub fn file_size() -> u64 {
 
 /// Human-readable lines, newest last. Used by the page and by export.
 pub fn text(entries: &[Entry]) -> String {
-    entries.iter().map(Entry::line).collect::<Vec<_>>().join("\n")
+    entries
+        .iter()
+        .map(Entry::line)
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 pub fn clear() {
@@ -359,11 +357,7 @@ pub fn export_diagnostics() -> Result<PathBuf, String> {
         std::env::consts::ARCH
     ));
     report.push_str(&format!("log file: {}\n", log_path().display()));
-    report.push_str(&format!(
-        "level: {} · file: {}\n",
-        level(),
-        file_enabled()
-    ));
+    report.push_str(&format!("level: {} · file: {}\n", level(), file_enabled()));
     report.push_str(&format!(
         "counters: errors {} · warnings {} · info {} · debug {}\n",
         counts[0], counts[1], counts[2], counts[3]

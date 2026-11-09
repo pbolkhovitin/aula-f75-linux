@@ -125,7 +125,11 @@ pub fn apply_to_keyboard(s: &mut AppState, v: &mut UiState, now: f64) {
         log::warn("apply", "refused: another device task is still running");
         toast(
             v,
-            t(s, "A device task is already running", "Устройство уже выполняет задачу"),
+            t(
+                s,
+                "A device task is already running",
+                "Устройство уже выполняет задачу",
+            ),
             now,
         );
         return;
@@ -2109,12 +2113,7 @@ fn log_row(ui: &mut Ui, entry: &log::Entry) {
         .show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
-                ui.label(
-                    RichText::new(&entry.at)
-                        .monospace()
-                        .size(10.0)
-                        .color(DIM),
-                );
+                ui.label(RichText::new(&entry.at).monospace().size(10.0).color(DIM));
                 ui.label(
                     RichText::new(entry.level.label())
                         .monospace()

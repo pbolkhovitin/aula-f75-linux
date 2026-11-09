@@ -1,0 +1,100 @@
+id = "pbolkhovitin/aula-f75"
+name = "AULA F75 Status"
+version = "0.1.0"
+plugin_api = 43
+author = "Pavel Bolkhovitin"
+license = "MIT"
+icon = "keyboard"
+description = "Bar indicator for the AULA F75 keyboard: connection, active profile, lighting effect, key remaps and macros."
+tags = ["bar", "panel", "hardware", "keyboard", "utility"]
+dependencies = ["f75-control"]
+
+[[setting]]
+key = "command"
+type = "string"
+label_key = "settings.command.label"
+description_key = "settings.command.description"
+default = "f75-control"
+
+[[setting]]
+key = "refresh_seconds"
+type = "int"
+label_key = "settings.refresh_seconds.label"
+description_key = "settings.refresh_seconds.description"
+default = 5
+min = 2
+max = 120
+
+[[setting]]
+key = "display"
+type = "select"
+label_key = "settings.display.label"
+description_key = "settings.display.description"
+default = "full"
+
+  [[setting.options]]
+  value = "full"
+  label_key = "settings.display.options.full"
+
+  [[setting.options]]
+  value = "compact"
+  label_key = "settings.display.options.compact"
+
+  [[setting.options]]
+  value = "glyph"
+  label_key = "settings.display.options.glyph"
+
+[[setting]]
+key = "show_profile"
+type = "bool"
+label_key = "settings.show_profile.label"
+description_key = "settings.show_profile.description"
+default = true
+
+[[setting]]
+key = "show_effect"
+type = "bool"
+label_key = "settings.show_effect.label"
+description_key = "settings.show_effect.description"
+default = true
+
+[[setting]]
+key = "show_connection"
+type = "bool"
+label_key = "settings.show_connection.label"
+description_key = "settings.show_connection.description"
+default = false
+
+[[setting]]
+key = "colorize"
+type = "bool"
+label_key = "settings.colorize.label"
+description_key = "settings.colorize.description"
+default = true
+
+[[setting]]
+key = "hide_when_disconnected"
+type = "bool"
+label_key = "settings.hide_when_disconnected.label"
+description_key = "settings.hide_when_disconnected.description"
+default = false
+
+[[setting]]
+key = "open_app_on_click"
+type = "bool"
+label_key = "settings.open_app_on_click.label"
+description_key = "settings.open_app_on_click.description"
+default = true
+
+[[widget]]
+id = "status"
+entry = "widget.luau"
+
+[[panel]]
+id = "details"
+entry = "panel.luau"
+width = 360
+height = 470
+placement = "attached"
+position = "auto"
+open_near_click = true

@@ -1,0 +1,86 @@
+{
+  "settings": {
+    "command": {
+      "label": "f75-control command",
+      "description": "Binary name on PATH or an absolute path to the F75 Control Center build."
+    },
+    "refresh_seconds": {
+      "label": "Refresh interval",
+      "description": "How often the widget asks f75-control for a new status snapshot."
+    },
+    "display": {
+      "label": "Bar text",
+      "description": "How much information the widget shows next to its icon.",
+      "options": {
+        "full": "Model, profile and effect",
+        "compact": "Profile and effect with brightness",
+        "glyph": "Icon only"
+      }
+    },
+    "show_profile": {
+      "label": "Show active profile",
+      "description": "Include the active profile name in the bar text and tooltip."
+    },
+    "show_effect": {
+      "label": "Show lighting effect",
+      "description": "Include the current lighting effect in the bar text."
+    },
+    "show_connection": {
+      "label": "Show connection type",
+      "description": "Add USB or 2.4 GHz to the bar text."
+    },
+    "colorize": {
+      "label": "Color by state",
+      "description": "Green when writes are available, amber for a read-only receiver, red for missing access."
+    },
+    "hide_when_disconnected": {
+      "label": "Hide when disconnected",
+      "description": "Remove the widget from the bar while no AULA F75 is detected."
+    },
+    "open_app_on_click": {
+      "label": "Open app on click",
+      "description": "Launch F75 Control Center when the widget is clicked; otherwise the click refreshes the snapshot."
+    }
+  },
+  "widget": {
+    "loading": "Reading keyboard status…",
+    "binary_missing": "f75-control was not found ({command}). Build the app or set the full path in the widget settings.",
+    "not_connected": "AULA F75 is not connected",
+    "usb": "USB",
+    "wireless": "2.4 GHz",
+    "access": "Access: {value}",
+    "write_ok": "Settings can be written",
+    "write_limited": "Read-only: the 2.4 GHz receiver drops settings writes; use the USB cable",
+    "profile": "Profile: {name} (#{index})",
+    "effect": "Effect: {name} · {brightness}% · speed {speed}",
+    "color": "Color: {value}",
+    "keys": "Remapped keys: {remapped} (+{fn} on FN) of {count}",
+    "macros": "Macros: {count} ({steps} steps)",
+    "power": "Debounce {debounce} ms · sleep {sleep} s"
+  },
+  "panel": {
+    "waiting": "Waiting for the first snapshot…",
+    "connect_hint": "Connect the keyboard with the USB cable or the 2.4 GHz receiver.",
+    "access": "Access",
+    "writes": "Settings writes",
+    "writes_ok": "Available",
+    "writes_limited": "Read-only on this link",
+    "firmware": "Firmware",
+    "paths": "hidraw nodes",
+    "profile": "Active profile",
+    "effect": "Lighting effect",
+    "brightness": "Brightness",
+    "speed": "Speed",
+    "color": "Color",
+    "keys": "Key remaps",
+    "keys_value": "{remapped} base · {fn} FN",
+    "macros": "Macros",
+    "macros_value": "{count} scripts · {steps} steps",
+    "power": "Typing and power",
+    "power_value": "{debounce} ms debounce · {sleep} s sleep",
+    "music": "Music mode",
+    "music_value": "mode {mode} · sensitivity {sensitivity}",
+    "refresh": "Refresh",
+    "open_app": "Open app"
+  }
+}

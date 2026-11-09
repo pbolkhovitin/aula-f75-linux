@@ -4,6 +4,7 @@ mod keyboard;
 mod log;
 mod model;
 mod pages;
+mod status;
 mod theme;
 
 use eframe::egui::{
@@ -29,10 +30,28 @@ fn main() {
     let mut screenshot: Option<PathBuf> = None;
     let mut initial_page: Option<usize> = None;
     let mut initial_lang: Option<Lang> = None;
+    let mut status_once = false;
+    let mut status_watch = false;
+    let mut status_pretty = false;
+    let mut status_interval: u64 = 3000;
     let args: Vec<String> = std::env::args().skip(1).collect();
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
+            "--status" => status_once = true,
+            "--watch" => status_watch = true,
+            "--pretty" => status_pretty = true,
+            "--interval" => {
+                i += 1;
+                status_interval = args
+                    .get(i)
+                    .and_then(|v| v.parse::<u64>().ok())
+                    .filter(|v| *v >= 250)
+                    .unwrap_or_else(|| {
+                        eprintln!("--interval needs milliseconds (>= 250)");
+                        std::process::exit(2);
+                    });
+            }
             "--screenshot" => {
                 i += 1;
                 if i >= args.len() {
@@ -79,7 +98,7 @@ fn main() {
                 };
             }
             "--help" | "-h" => {
-                println!("F75 Control Center\n  --screenshot <file.png>   draw 120 frames, save and exit\n  --page <name>            lighting|keys|macros|music|profiles|settings|device|log|docs\n  --lang <en|ru>           interface language");
+                println!("F75 Control Center\n  --status                 print a JSON snapshot and exit\n  --watch                  stream a JSON line whenever the snapshot changes\n  --interval <ms>          watch polling interval (default 3000)\n  --pretty                 indent status JSON\n  --screenshot <file.png>   draw 120 frames, save and exit\n  --page <name>            lighting|keys|macros|music|profiles|settings|device|log|docs\n  --lang <en|ru>           interface language");
                 return;
             }
             other => {
@@ -88,6 +107,17 @@ fn main() {
             }
         }
         i += 1;
+    }
+
+    // Status mode is headless and side-effect free: no logging file is
+    // truncated and no egui context is built.
+    if status_watch {
+        status::watch(status_interval, status_pretty);
+        return;
+    }
+    if status_once {
+        status::run(status_pretty);
+        return;
     }
 
     let shot_mode = screenshot.is_some();
@@ -304,7 +334,9 @@ impl F75App {
                             }
                         });
                         ui.add_space(8.0);
-                        if ghost_button(ui, tr(lang, "Save locally", "Сохранить локально")).clicked() {
+                        if ghost_button(ui, tr(lang, "Save locally", "Сохранить локально"))
+                            .clicked()
+                        {
                             self.save(now);
                             pages::toast(
                                 &mut self.view,
@@ -322,7 +354,8 @@ impl F75App {
                         }
                         ui.add_space(8.0);
                         if !self.view.devices.is_empty() && !pages::access_ready(&self.view) {
-                            if ghost_button(ui, tr(lang, "Fix access", "Дать доступ")).clicked() {
+                            if ghost_button(ui, tr(lang, "Fix access", "Дать доступ")).clicked()
+                            {
                                 self.state.page = 6;
                                 pages::toast(
                                     &mut self.view,
@@ -611,7 +644,10 @@ impl F75App {
         let path = config_path();
         if let Some(parent) = path.parent() {
             if let Err(err) = std::fs::create_dir_all(parent) {
-                log::error("storage", format!("cannot create {}: {err}", parent.display()));
+                log::error(
+                    "storage",
+                    format!("cannot create {}: {err}", parent.display()),
+                );
             }
         }
         match serde_json::to_string_pretty(&self.state) {

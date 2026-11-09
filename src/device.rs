@@ -187,7 +187,10 @@ pub fn save_install_script() -> std::io::Result<PathBuf> {
     let mut perms = std::fs::metadata(&path)?.permissions();
     perms.set_mode(0o755);
     std::fs::set_permissions(&path, perms)?;
-    log::debug("access", format!("fix script written to {}", path.display()));
+    log::debug(
+        "access",
+        format!("fix script written to {}", path.display()),
+    );
     Ok(path)
 }
 
@@ -261,7 +264,11 @@ pub fn install_with_pkexec() -> Result<String, String> {
         })?;
     if output.status.success() {
         let text = String::from_utf8_lossy(&output.stdout);
-        let message = text.lines().last().unwrap_or("Access rule installed").to_string();
+        let message = text
+            .lines()
+            .last()
+            .unwrap_or("Access rule installed")
+            .to_string();
         log::info("access", format!("pkexec finished: {message}"));
         Ok(message)
     } else {
@@ -408,10 +415,7 @@ pub fn check_access() -> Vec<AccessCheck> {
                 })
                 .unwrap_or_else(|| "?".to_string());
             if writable {
-                log::debug(
-                    "access",
-                    format!("{} is writable (mode {mode})", d.path),
-                );
+                log::debug("access", format!("{} is writable (mode {mode})", d.path));
             } else {
                 log::warn(
                     "access",
@@ -858,8 +862,8 @@ fn apply_to(
             format!("{skipped} macro step(s) cannot be encoded"),
         );
     }
-    let has_key_work = keys.base.iter().any(|assignment| assignment.is_some())
-        || !bindings.is_empty();
+    let has_key_work =
+        keys.base.iter().any(|assignment| assignment.is_some()) || !bindings.is_empty();
     log::debug(
         "apply",
         format!(
@@ -1092,11 +1096,7 @@ pub fn probe_devices() -> Vec<ProbeReport> {
             profile_ok: false,
             profile_error: String::new(),
         };
-        let file = match OpenOptions::new()
-            .read(true)
-            .write(true)
-            .open(&device.path)
-        {
+        let file = match OpenOptions::new().read(true).write(true).open(&device.path) {
             Ok(file) => {
                 report.access_ok = true;
                 file

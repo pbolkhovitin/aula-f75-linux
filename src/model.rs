@@ -709,16 +709,11 @@ pub fn actions_for(category: usize) -> &'static [&'static str] {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum Lang {
+    #[default]
     En,
     Ru,
-}
-
-impl Default for Lang {
-    fn default() -> Self {
-        Lang::En
-    }
 }
 
 pub fn tr(lang: Lang, en: &'static str, ru: &'static str) -> &'static str {

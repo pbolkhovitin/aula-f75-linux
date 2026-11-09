@@ -493,7 +493,7 @@ impl F75App {
             return;
         }
         let fade = ((until - now) / 0.35).min(1.0) as f32;
-        egui::Area::new(Id::new("toast"))
+        egui::Area::new(Id::unique("toast"))
             .anchor(Align2::RIGHT_BOTTOM, vec2(-22.0, -42.0))
             .interactable(false)
             .show(ctx, |ui| {

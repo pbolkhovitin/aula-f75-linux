@@ -87,7 +87,7 @@ pub fn heading(ui: &mut Ui, title: &str, subtitle: &str) {
                 ui.label(RichText::new(subtitle).size(13.0).color(MUTED));
             }
         });
-        ui.with_layout(egui::Layout::right_to_left(Align::Center), |ui| {});
+        ui.with_layout(egui::Layout::right_to_left(Align::Center), |_ui| {});
     });
 }
 
@@ -587,9 +587,7 @@ pub fn underline_tab(ui: &mut Ui, selected: bool, text: &str) -> Response {
         egui::Align2::CENTER_CENTER,
         text,
         FontId::new(13.0, FontFamily::Proportional),
-        if selected {
-            TEXT
-        } else if resp.hovered() {
+        if selected || resp.hovered() {
             TEXT
         } else {
             MUTED

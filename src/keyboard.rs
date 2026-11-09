@@ -1,8 +1,7 @@
-use crate::model::{AppState, KeyDef, KEYS, KEY_COUNT};
+use crate::model::{AppState, KeyDef, KEYS};
 use crate::theme::*;
 use eframe::egui::{
-    self, pos2, vec2, Color32, FontFamily, FontId, Pos2, Rect, Response, Sense, Stroke, StrokeKind,
-    Ui, Vec2,
+    self, pos2, vec2, Color32, FontFamily, FontId, Pos2, Rect, Sense, Stroke, StrokeKind, Ui, Vec2,
 };
 
 pub struct KeyHit {

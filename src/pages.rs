@@ -5,7 +5,7 @@ use crate::model::*;
 use crate::theme::*;
 use eframe::egui::{
     self, pos2, vec2, Align, Color32, CornerRadius, FontFamily, FontId, Frame, Layout, Margin,
-    RichText, ScrollArea, Sense, Stroke, StrokeKind, TextEdit, Ui, Vec2,
+    RichText, ScrollArea, Sense, Stroke, StrokeKind, TextEdit, Ui,
 };
 use std::sync::mpsc::{Receiver, TryRecvError};
 
@@ -367,7 +367,7 @@ pub fn lighting(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(if s.lighting.paint { t(s, "Paint mode: click a key", "Режим кисти: нажмите клавишу") } else { t(s, "Click a key to inspect it", "Нажмите клавишу для выбора") }).size(11.0).color(DIM));
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                        ui.label(RichText::new(format!("{} keys · {} LED slots · FN layer", KEY_COUNT, MATRIX_LEN)).size(10.5).color(DIM));
+                        ui.label(RichText::new(format!("{} keys · {} LEDs · FN layer", KEY_COUNT, LED_COUNT)).size(10.5).color(DIM));
                     });
                 });
             });
@@ -1056,7 +1056,7 @@ pub fn macros_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                             }
                             ui.painter().text(pos2(x, rect.center().y), egui::Align2::LEFT_CENTER, format!("+{} ms", step.delay_ms), FontId::new(9.5, FontFamily::Proportional), DIM);
                             let del = egui::Rect::from_center_size(pos2(rect.right() - 16.0, rect.center().y), vec2(20.0, 20.0));
-                            let dr = ui.interact(del, ui.id().with(("del_step", idx, i)), Sense::click());
+                            let dr = ui.interact(del, ui.scope_id().with(("del_step", idx, i)), Sense::click());
                             ui.painter().text(del.center(), egui::Align2::CENTER_CENTER, "×", FontId::new(14.0, FontFamily::Proportional), if dr.hovered() { RED } else { DIM });
                             if dr.clicked() {
                                 delete = Some(i);
@@ -2610,7 +2610,7 @@ pub fn file_dialog(ctx: &egui::Context, s: &mut AppState, v: &mut UiState, time:
                     format!("Export failed: {e}")
                 }
             };
-            toast(v, msg, time as f64);
+            toast(v, msg, time);
         } else {
             let msg = match import_profile(s, &v.import_name) {
                 Ok(name) => {
@@ -2622,7 +2622,7 @@ pub fn file_dialog(ctx: &egui::Context, s: &mut AppState, v: &mut UiState, time:
                     format!("Import failed: {e}")
                 }
             };
-            toast(v, msg, time as f64);
+            toast(v, msg, time);
         }
         v.file_dialog = None;
     } else if !open {

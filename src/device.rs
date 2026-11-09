@@ -15,7 +15,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::log;
-use crate::model::{self, Effect, KeyMap, Lighting, Macro, MacroStep, StepKind};
+use crate::model::{self, Effect, KeyMap, Lighting, Macro, StepKind};
 
 const FEATURE_REPORT_ID: u8 = 6;
 const FEATURE_REPORT_LEN: usize = 1032;
@@ -1281,6 +1281,7 @@ pub fn spawn_probe() -> Receiver<JobOutcome> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::MacroStep;
 
     #[test]
     fn config_frame_matches_vendor_layout() {

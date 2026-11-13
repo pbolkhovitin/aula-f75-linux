@@ -12,9 +12,12 @@ pub const PANEL_3: Color32 = Color32::from_rgb(48, 48, 54);
 pub const LINE: Color32 = Color32::from_rgb(56, 56, 63);
 pub const LINE_SOFT: Color32 = Color32::from_rgb(44, 44, 50);
 pub const TEXT: Color32 = Color32::from_rgb(232, 232, 236);
-pub const MUTED: Color32 = Color32::from_rgb(154, 154, 164);
-pub const DIM: Color32 = Color32::from_rgb(108, 108, 118);
+pub const MUTED: Color32 = Color32::from_rgb(170, 170, 180);
+pub const DIM: Color32 = Color32::from_rgb(146, 146, 158);
 pub const ACCENT: Color32 = Color32::from_rgb(10, 147, 255);
+/// Text on a filled accent button. White on #0A93FF is only 3.2:1, which
+/// fails WCAG AA for normal text; near-black ink is 6.2:1.
+pub const ON_ACCENT: Color32 = Color32::from_rgb(7, 20, 33);
 pub const ACCENT_SOFT: Color32 = Color32::from_rgb(10, 90, 150);
 pub const ACCENT_DARK: Color32 = Color32::from_rgb(18, 54, 82);
 pub const GREEN: Color32 = Color32::from_rgb(48, 209, 88);
@@ -200,7 +203,7 @@ pub fn accent_button(ui: &mut Ui, text: &str) -> Response {
     let galley = ui.painter().layout_no_wrap(
         text.to_owned(),
         FontId::new(13.5, FontFamily::Proportional),
-        Color32::WHITE,
+        ON_ACCENT,
     );
     let w = galley.size().x + 34.0;
     let (rect, resp) = ui.allocate_exact_size(vec2(w, 38.0), Sense::click());
@@ -216,7 +219,7 @@ pub fn accent_button(ui: &mut Ui, text: &str) -> Response {
         egui::Align2::CENTER_CENTER,
         text,
         FontId::new(13.5, FontFamily::Proportional),
-        Color32::WHITE,
+        ON_ACCENT,
     );
     resp
 }

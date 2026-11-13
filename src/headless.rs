@@ -11,7 +11,7 @@ use eframe::egui::{Color32, Pos2, Rect};
 use std::collections::HashMap;
 use std::path::Path;
 
-pub fn render(app: &mut crate::F75App, path: &Path) {
+pub fn render(app: &mut crate::F75App, path: &Path, width: usize, height: usize) {
     let ctx = egui::Context::default();
     crate::theme::setup(&ctx);
     ctx.set_pixels_per_point(1.0);
@@ -24,7 +24,7 @@ pub fn render(app: &mut crate::F75App, path: &Path) {
         let mut input = egui::RawInput::default();
         input.screen_rect = Some(Rect::from_min_size(
             Pos2::ZERO,
-            egui::vec2(crate::model::WINDOW_W, crate::model::WINDOW_H),
+            egui::vec2(width as f32, height as f32),
         ));
         input.time = Some(time);
         input.predicted_dt = 1.0 / 60.0;
@@ -43,8 +43,6 @@ pub fn render(app: &mut crate::F75App, path: &Path) {
     };
 
     let primitives = ctx.tessellate(output.shapes, 1.0);
-    let width = crate::model::WINDOW_W as usize;
-    let height = crate::model::WINDOW_H as usize;
     let pixels = rasterize(width, height, &primitives, &textures);
 
     if let Some(parent) = path.parent() {

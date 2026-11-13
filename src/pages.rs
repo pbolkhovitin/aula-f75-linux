@@ -9,6 +9,28 @@ use eframe::egui::{
 };
 use std::sync::mpsc::{Receiver, TryRecvError};
 
+/// Two-column pages were designed at 1200 px. niri tiles windows to the
+/// column width, so the same page can be narrower (half a screen) or much
+/// wider (a full 4K output). Keep the design widths when they fit, otherwise
+/// shrink both columns proportionally, with a floor that keeps controls
+/// usable, and let the caller centre the whole block on wide screens.
+fn columns(ui: &Ui, left_design: f32, right_design: f32) -> (f32, f32) {
+    const GAP: f32 = 12.0;
+    let avail = ui.available_width();
+    if avail >= left_design + right_design + GAP {
+        return (left_design, right_design);
+    }
+    let scale = ((avail - GAP) / (left_design + right_design)).clamp(0.55, 1.0);
+    let min_left = left_design.min(380.0);
+    // The right column holds the effect grid and the colour swatches. Below
+    // about 330 px the ten swatches wrap and push Apply out of the card, so
+    // keep that floor and give the left column what is left.
+    let min_right = right_design.min(342.0);
+    let right = (right_design * scale).max(min_right).min(avail - GAP - 240.0);
+    let left = (avail - GAP - right).max(min_left.min(avail - GAP - right));
+    (left, right)
+}
+
 /// A background device task. The kernel can spend five seconds inside one
 /// feature-report write; running it on the UI thread made the whole window
 /// look frozen, which is half of why "it does not work" felt like a crash.
@@ -327,6 +349,9 @@ fn page_header(
 }
 
 pub fn lighting(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
+    // niri gives the window the full output height; a 680 px tile is the
+    // narrow case. Trim the effect list there so Apply stays in view.
+    let short = ui.ctx().viewport_rect().height() < 720.0;
     page_header(
         ui,
         s,
@@ -337,7 +362,8 @@ pub fn lighting(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
     );
     ui.add_space(14.0);
     ui.horizontal_top(|ui| {
-        ui.allocate_ui_with_layout(vec2(710.0, 520.0), Layout::top_down(Align::Min), |ui| {
+        let (w_left, w_right) = columns(ui, 710.0, 342.0);
+        ui.allocate_ui_with_layout(vec2(w_left, 520.0), Layout::top_down(Align::Min), |ui| {
             card().show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(t(s, "Keyboard preview", "Предпросмотр клавиатуры")).size(15.0).strong());
@@ -349,7 +375,7 @@ pub fn lighting(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                     });
                 });
                 ui.add_space(6.0);
-                let hit = keyboard::keyboard(ui, s, vec2(672.0, 300.0), time, true, true);
+                let hit = keyboard::keyboard(ui, s, vec2((w_left - 38.0).max(320.0), 300.0), time, true, true);
                 if let Some(k) = hit.clicked {
                     if s.lighting.paint {
                         if let Some(c) = s.lighting.per_key.get_mut(k) {
@@ -422,7 +448,10 @@ pub fn lighting(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
             });
         });
         ui.add_space(12.0);
-        ui.allocate_ui_with_layout(vec2(342.0, 520.0), Layout::top_down(Align::Min), |ui| {
+        ui.allocate_ui_with_layout(vec2(w_right, 520.0), Layout::top_down(Align::Min), |ui| {
+            // On a short tile the effect card is taller than the page area;
+            // scroll it instead of cutting Apply and Save off.
+            ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
             card_pad(16).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(t(s, "Effect", "Эффект")).size(15.0).strong());
@@ -431,15 +460,16 @@ pub fn lighting(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                     });
                 });
                 ui.add_space(8.0);
-                ScrollArea::vertical().max_height(190.0).auto_shrink([false, false]).show(ui, |ui| {
-                    ui.spacing_mut().item_spacing.y = 5.0;
+                ScrollArea::vertical().max_height(if short { 124.0 } else { 190.0 }).auto_shrink([false, false]).show(ui, |ui| {
+                    ui.spacing_mut().item_spacing.y = if short { 4.0 } else { 5.0 };
+                    let chip_w = ((ui.available_width() - 8.0) / 2.0).max(104.0);
                     let mut i = 0;
                     while i < EFFECTS.len() {
                         ui.horizontal(|ui| {
                             for j in 0..2 {
                                 if i + j < EFFECTS.len() {
                                     let e = &EFFECTS[i + j];
-                                    if effect_chip(ui, e, s.lighting.effect == e.ui, 143.0).clicked() {
+                                    if effect_chip(ui, e, s.lighting.effect == e.ui, chip_w).clicked() {
                                         s.lighting.effect = e.ui;
                                         if e.ui == 19 {
                                             s.lighting.paint = true;
@@ -517,6 +547,7 @@ pub fn lighting(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                 };
                 ui.label(RichText::new(status).size(10.5).color(DIM));
                 ui.label(RichText::new(t(s, "Effect, per-key colours, brightness, speed, direction, random colour, key remaps and macro assignments are written.", "Эффект, цвета клавиш, яркость, скорость, направление, случайный цвет, переназначения и макросы записываются.")).size(9.5).color(DIM));
+            });
             });
         });
     });
@@ -667,7 +698,8 @@ pub fn keys_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
     );
     ui.add_space(14.0);
     ui.horizontal_top(|ui| {
-        ui.allocate_ui_with_layout(vec2(700.0, 520.0), Layout::top_down(Align::Min), |ui| {
+        let (w_left, w_right) = columns(ui, 700.0, 352.0);
+        ui.allocate_ui_with_layout(vec2(w_left, 520.0), Layout::top_down(Align::Min), |ui| {
             card().show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(
@@ -688,7 +720,7 @@ pub fn keys_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                     });
                 });
                 ui.add_space(4.0);
-                let hit = keyboard::keyboard(ui, s, vec2(660.0, 300.0), time, true, true);
+                let hit = keyboard::keyboard(ui, s, vec2((w_left - 40.0).max(320.0), 300.0), time, true, true);
                 if let Some(k) = hit.clicked {
                     s.active_key = k;
                 }
@@ -756,7 +788,7 @@ pub fn keys_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
             });
         });
         ui.add_space(12.0);
-        ui.allocate_ui_with_layout(vec2(352.0, 520.0), Layout::top_down(Align::Min), |ui| {
+        ui.allocate_ui_with_layout(vec2(w_right, 520.0), Layout::top_down(Align::Min), |ui| {
             card_pad(16).show(ui, |ui| {
                 let key = s.active_key.min(KEY_COUNT - 1);
                 ui.horizontal(|ui| {
@@ -917,7 +949,8 @@ pub fn macros_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
     );
     ui.add_space(14.0);
     ui.horizontal_top(|ui| {
-        ui.allocate_ui_with_layout(vec2(280.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        let (w_left, w_right) = columns(ui, 280.0, 772.0);
+        ui.allocate_ui_with_layout(vec2(w_left, 560.0), Layout::top_down(Align::Min), |ui| {
             card_pad(12).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(t(s, "Library", "Библиотека")).size(14.0).strong());
@@ -972,7 +1005,7 @@ pub fn macros_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
             });
         });
         ui.add_space(12.0);
-        ui.allocate_ui_with_layout(vec2(772.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        ui.allocate_ui_with_layout(vec2(w_right, 560.0), Layout::top_down(Align::Min), |ui| {
             card_pad(16).show(ui, |ui| {
                 if s.macros.is_empty() {
                     ui.label(RichText::new(t(s, "No macros yet", "Макросов пока нет")).size(15.0).color(MUTED));
@@ -1110,7 +1143,8 @@ pub fn music_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
     );
     ui.add_space(14.0);
     ui.horizontal_top(|ui| {
-        ui.allocate_ui_with_layout(vec2(320.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        let (w_left, w_right) = columns(ui, 320.0, 732.0);
+        ui.allocate_ui_with_layout(vec2(w_left, 560.0), Layout::top_down(Align::Min), |ui| {
             card_pad(14).show(ui, |ui| {
                 ui.label(RichText::new(t(s, "Music modes", "Музыкальные режимы")).size(14.0).strong());
                 ui.add_space(6.0);
@@ -1138,7 +1172,7 @@ pub fn music_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
             });
         });
         ui.add_space(12.0);
-        ui.allocate_ui_with_layout(vec2(732.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        ui.allocate_ui_with_layout(vec2(w_right, 560.0), Layout::top_down(Align::Min), |ui| {
             card().show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new(t(s, "Live preview", "Живой предпросмотр")).size(15.0).strong());
@@ -1151,7 +1185,7 @@ pub fn music_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                 preview.lighting.effect = music_effect(s.music_mode);
                 preview.lighting.brightness = s.music_sensitivity.min(9);
                 preview.lighting.speed = 3;
-                keyboard::keyboard(ui, &preview, vec2(696.0, 300.0), time * 1.4, false, false);
+                keyboard::keyboard(ui, &preview, vec2((w_right - 36.0).max(320.0), 300.0), time * 1.4, false, false);
                 ui.add_space(4.0);
                 let (rect, _) = ui.allocate_exact_size(vec2(696.0, 52.0), Sense::hover());
                 let bars = 48;
@@ -1254,6 +1288,10 @@ pub fn profiles_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
     });
     ui.add_space(10.0);
     ScrollArea::vertical().max_height(510.0).auto_shrink([false, false]).show(ui, |ui| {
+        // Three profile cards per row on a wide window, narrower cards on a
+        // tiled half-screen so the third column is never cut off.
+        let card_w = ((ui.available_width() - 20.0) / 3.0).max(238.0);
+        let card_h = if card_w < 320.0 { 226.0 } else { 190.0 };
         let mut activate: Option<usize> = None;
         let mut copy: Option<usize> = None;
         let mut rename: Option<usize> = None;
@@ -1264,9 +1302,9 @@ pub fn profiles_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
                     let i = row * 3 + col;
                     if i >= s.profiles.len() {
                         if i == 5 {
-                            ui.allocate_ui_with_layout(vec2(348.0, 190.0), Layout::top_down(Align::Min), |ui| {
+                            ui.allocate_ui_with_layout(vec2(card_w, card_h), Layout::top_down(Align::Min), |ui| {
                                 Frame::new().fill(Color32::TRANSPARENT).stroke(Stroke::new(1.0, LINE)).corner_radius(12).inner_margin(Margin::same(18)).show(ui, |ui| {
-                                    ui.set_min_size(vec2(312.0, 154.0));
+                                    ui.set_min_size(vec2(card_w - 36.0, card_h - 36.0));
                                     ui.vertical_centered(|ui| {
                                         ui.add_space(46.0);
                                         ui.label(RichText::new("+").size(28.0).color(DIM));
@@ -1275,9 +1313,9 @@ pub fn profiles_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
                                 });
                             });
                         } else if row == 1 {
-                            ui.allocate_ui_with_layout(vec2(348.0, 190.0), Layout::top_down(Align::Min), |ui| {
+                            ui.allocate_ui_with_layout(vec2(card_w, card_h), Layout::top_down(Align::Min), |ui| {
                                 card().show(ui, |ui| {
-                                    ui.set_min_size(vec2(312.0, 154.0));
+                                    ui.set_min_size(vec2(card_w - 36.0, card_h - 36.0));
                                     ui.label(RichText::new(t(s, "Where profiles live", "Где хранятся профили")).size(14.0).strong());
                                     ui.add_space(6.0);
                                     ui.label(RichText::new(t(s, "Profiles are written to your home folder as small text files. Nothing is uploaded.", "Профили сохраняются в домашней папке небольшими текстовыми файлами. Ничего не отправляется в сеть.")).size(11.0).color(MUTED));
@@ -1290,14 +1328,14 @@ pub fn profiles_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
                     }
                     let active = s.active_profile == i;
                     let p = &s.profiles[i];
-                    ui.allocate_ui_with_layout(vec2(348.0, 190.0), Layout::top_down(Align::Min), |ui| {
+                    ui.allocate_ui_with_layout(vec2(card_w, card_h), Layout::top_down(Align::Min), |ui| {
                         let frame = Frame::new()
                             .fill(if active { Color32::from_rgb(30, 43, 55) } else { PANEL })
                             .stroke(Stroke::new(1.0, if active { ACCENT_SOFT } else { LINE_SOFT }))
                             .corner_radius(12)
                             .inner_margin(Margin::same(16));
                         frame.show(ui, |ui| {
-                            ui.set_min_size(vec2(316.0, 158.0));
+                            ui.set_min_size(vec2(card_w - 32.0, card_h - 32.0));
                             ui.horizontal(|ui| {
                                 let (rect, _) = ui.allocate_exact_size(vec2(36.0, 36.0), Sense::hover());
                                 ui.painter().rect_filled(rect, 8, PANEL_3);
@@ -1319,7 +1357,7 @@ pub fn profiles_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
                                 ui.label(RichText::new(format!("{} · {}% · {} macros", effect_by_ui(p.data.lighting.effect).name, (p.data.lighting.brightness as u32 + 1) * 10, p.macros)).size(10.5).color(MUTED));
                             });
                             ui.add_space(8.0);
-                            ui.horizontal(|ui| {
+                            ui.horizontal_wrapped(|ui| {
                                 if !active && accent_button(ui, t(s, "Activate", "Активировать")).clicked() {
                                     activate = Some(i);
                                 }
@@ -1329,11 +1367,9 @@ pub fn profiles_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
                                 if !p.built_in && ghost_button(ui, t(s, "Rename", "Имя")).clicked() {
                                     rename = Some(i);
                                 }
-                                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                                    if !p.built_in && ghost_button(ui, t(s, "Delete", "Удалить")).clicked() {
-                                        delete = Some(i);
-                                    }
-                                });
+                                if !p.built_in && ghost_button(ui, t(s, "Delete", "Удалить")).clicked() {
+                                    delete = Some(i);
+                                }
                             });
                         });
                     });
@@ -1419,7 +1455,8 @@ pub fn settings_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
     );
     ui.add_space(14.0);
     ui.horizontal_top(|ui| {
-        ui.allocate_ui_with_layout(vec2(530.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        let (w_left, w_right) = columns(ui, 530.0, 522.0);
+        ui.allocate_ui_with_layout(vec2(w_left, 560.0), Layout::top_down(Align::Min), |ui| {
             card_pad(16).show(ui, |ui| {
                 ui.label(RichText::new(t(s, "Language & appearance", "Язык и оформление")).size(14.0).strong());
                 ui.add_space(8.0);
@@ -1503,7 +1540,7 @@ pub fn settings_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) 
             });
         });
         ui.add_space(12.0);
-        ui.allocate_ui_with_layout(vec2(522.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        ui.allocate_ui_with_layout(vec2(w_right, 560.0), Layout::top_down(Align::Min), |ui| {
             card_pad(16).show(ui, |ui| {
                 ui.label(RichText::new(t(s, "Application", "Приложение")).size(14.0).strong());
                 ui.add_space(8.0);
@@ -2000,7 +2037,8 @@ pub fn device_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
     );
     ui.add_space(12.0);
     ui.horizontal_top(|ui| {
-        ui.allocate_ui_with_layout(vec2(690.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        let (w_left, w_right) = columns(ui, 690.0, 362.0);
+        ui.allocate_ui_with_layout(vec2(w_left, 560.0), Layout::top_down(Align::Min), |ui| {
             access_card(ui, s, v, time);
             ui.add_space(10.0);
             card().show(ui, |ui| {
@@ -2015,11 +2053,11 @@ pub fn device_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                     });
                 });
                 ui.add_space(4.0);
-                keyboard::keyboard(ui, s, vec2(648.0, 200.0), time, false, false);
+                keyboard::keyboard(ui, s, vec2((w_left - 42.0).max(300.0), 200.0), time, false, false);
             });
         });
         ui.add_space(12.0);
-        ui.allocate_ui_with_layout(vec2(362.0, 560.0), Layout::top_down(Align::Min), |ui| {
+        ui.allocate_ui_with_layout(vec2(w_right, 560.0), Layout::top_down(Align::Min), |ui| {
             card_pad(16).show(ui, |ui| {
                 ui.label(RichText::new(t(s, "Identity", "Идентификация")).size(14.0).strong());
                 ui.add_space(8.0);
@@ -2188,7 +2226,8 @@ pub fn log_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
     ui.add_space(8.0);
 
     ui.horizontal_top(|ui| {
-        ui.allocate_ui_with_layout(vec2(746.0, 548.0), Layout::top_down(Align::Min), |ui| {
+        let (w_left, w_right) = columns(ui, 746.0, 320.0);
+        ui.allocate_ui_with_layout(vec2(w_left, 548.0), Layout::top_down(Align::Min), |ui| {
             card_pad(12).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     for (i, label) in [
@@ -2254,7 +2293,7 @@ pub fn log_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
             });
         });
         ui.add_space(12.0);
-        ui.allocate_ui_with_layout(vec2(320.0, 548.0), Layout::top_down(Align::Min), |ui| {
+        ui.allocate_ui_with_layout(vec2(w_right, 548.0), Layout::top_down(Align::Min), |ui| {
             card_pad(16).show(ui, |ui| {
                 ui.label(
                     RichText::new(t(s, "Log file", "Файл журнала"))
@@ -2437,7 +2476,8 @@ pub fn docs_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
     ui.add_space(14.0);
     ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
         ui.horizontal_top(|ui| {
-            ui.allocate_ui_with_layout(vec2(660.0, 560.0), Layout::top_down(Align::Min), |ui| {
+            let (w_left, w_right) = columns(ui, 660.0, 362.0);
+            ui.allocate_ui_with_layout(vec2(w_left, 560.0), Layout::top_down(Align::Min), |ui| {
                 card_pad(16).show(ui, |ui| {
                     ui.label(RichText::new(t(s, "Quick start", "Быстрый старт")).size(14.0).strong());
                     ui.add_space(8.0);
@@ -2472,7 +2512,7 @@ pub fn docs_page(ui: &mut Ui, s: &mut AppState, v: &mut UiState, time: f32) {
                 });
             });
             ui.add_space(12.0);
-            ui.allocate_ui_with_layout(vec2(362.0, 560.0), Layout::top_down(Align::Min), |ui| {
+            ui.allocate_ui_with_layout(vec2(w_right, 560.0), Layout::top_down(Align::Min), |ui| {
                 card_pad(16).show(ui, |ui| {
                     ui.label(RichText::new(t(s, "Written to the keyboard", "Записывается в клавиатуру")).size(14.0).strong());
                     ui.add_space(6.0);

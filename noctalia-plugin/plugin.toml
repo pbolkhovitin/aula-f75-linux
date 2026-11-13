@@ -84,7 +84,7 @@ key = "open_app_on_click"
 type = "bool"
 label_key = "settings.open_app_on_click.label"
 description_key = "settings.open_app_on_click.description"
-default = true
+default = false
 
 [[widget]]
 id = "status"

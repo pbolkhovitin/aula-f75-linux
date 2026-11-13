@@ -32,6 +32,16 @@ local function refreshSeconds()
   return math.max(2, math.min(120, value))
 end
 
+local function accessText(device)
+  if device.access == "denied" then
+    return noctalia.tr("widget.access_denied")
+  end
+  if device.access == "error" then
+    return noctalia.tr("widget.access_error")
+  end
+  return noctalia.tr("widget.access_ok")
+end
+
 local function statusColor(data)
   if not config("colorize", true) then
     return "on_surface"
@@ -109,7 +119,7 @@ local function tooltip(data)
     table.insert(lines, noctalia.tr("widget.not_connected"))
   else
     table.insert(lines, "F75 · " .. tostring(device.transport_label or device.transport))
-    table.insert(lines, noctalia.tr("widget.access", { value = tostring(device.access) }))
+    table.insert(lines, accessText(device))
     if device.write_supported then
       table.insert(lines, noctalia.tr("widget.write_ok"))
     else
@@ -124,7 +134,6 @@ local function tooltip(data)
       noctalia.tr("widget.effect", {
         name = tostring(lighting.effect_name or "?"),
         brightness = tostring(lighting.brightness_percent or 0),
-        speed = tostring(lighting.speed or 0),
       })
     )
     table.insert(lines, noctalia.tr("widget.color", { value = tostring(lighting.color or "?") }))
@@ -241,10 +250,10 @@ function update()
 end
 
 function onClick()
-  if config("open_app_on_click", true) then
+  if config("open_app_on_click", false) then
     noctalia.runAsync({ command() })
   else
-    fetch()
+    noctalia.togglePanel("pbolkhovitin/aula-f75:details")
   end
 end
 

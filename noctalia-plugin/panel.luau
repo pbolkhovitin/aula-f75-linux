@@ -1,6 +1,10 @@
 --!nonstrict
 -- Detail panel for the AULA F75 widget. Read-only view plus two actions:
 -- refresh the snapshot and open the desktop app.
+--
+-- The panel deliberately shows what a person can act on (connection, profile,
+-- lighting, remaps) and hides protocol details such as the raw access code,
+-- firmware number or hidraw paths; those live in the app's Log page.
 
 local snapshot = noctalia.state.get("f75_status")
 local busy = false
@@ -32,18 +36,32 @@ local function row(icon, label, value, color)
   })
 end
 
+local function accessColor(device)
+  if device.access == "denied" or device.access == "error" then
+    return "error"
+  end
+  return device.write_supported and "primary" or "secondary"
+end
+
 local function statusColor(data)
   if data == nil then
     return "on_surface_variant"
   end
   local device = data.device or {}
-  if device.access == "denied" or device.access == "error" then
-    return "error"
-  end
   if not device.present then
     return "on_surface_variant"
   end
-  return device.write_supported and "primary" or "secondary"
+  return accessColor(device)
+end
+
+local function accessText(device)
+  if device.access == "denied" then
+    return noctalia.tr("panel.access_denied")
+  end
+  if device.access == "error" then
+    return noctalia.tr("panel.access_error")
+  end
+  return noctalia.tr("panel.access_ok")
 end
 
 local function render()
@@ -58,7 +76,7 @@ local function render()
   local color = statusColor(data)
 
   local body = {}
-  local header = {
+  table.insert(body, ui.row({ gap = 9, align = "center" }, {
     ui.glyph({ name = device.present and "keyboard" or "keyboard-off", size = 18, color = color }),
     ui.column({ gap = 1, flexGrow = 1 }, {
       ui.label({ text = "AULA F75", fontSize = 16, fontWeight = "bold" }),
@@ -68,8 +86,7 @@ local function render()
         color = color,
       }),
     }),
-  }
-  table.insert(body, ui.row({ gap = 9, align = "center" }, header))
+  }))
 
   if data == nil then
     table.insert(body, ui.label({ text = noctalia.tr("panel.waiting"), color = "on_surface_variant" }))
@@ -82,27 +99,21 @@ local function render()
       })
     )
   else
+    if not device.write_supported then
+      table.insert(
+        body,
+        ui.column({ gap = 3, padding = 10, radius = 10, fill = "secondary/0.10" }, {
+          ui.label({ text = accessText(device), fontWeight = "medium", color = color }),
+          ui.label({ text = noctalia.tr("panel.writes_limited_hint"), fontSize = 10, color = "on_surface_variant", maxLines = 3 }),
+        })
+      )
+    end
     table.insert(
       body,
       ui.column({ gap = 3, padding = 10, radius = 10, fill = "surface/0.48" }, {
-        row("plug", noctalia.tr("panel.access"), tostring(device.access), color),
-        row(
-          "circle-check",
-          noctalia.tr("panel.writes"),
-          device.write_supported and noctalia.tr("panel.writes_ok") or noctalia.tr("panel.writes_limited"),
-          device.write_supported and "primary" or "secondary"
-        ),
-        row("cpu", noctalia.tr("panel.firmware"), string.format("%d (%s)", tonumber(device.firmware) or 0, tostring(device.firmware_hex or ""))),
-        row("keyboard", noctalia.tr("panel.paths"), string.format("%s · %s", tostring(device.control_path or "—"), tostring(device.keyboard_path or "—"))),
-      })
-    )
-    table.insert(
-      body,
-      ui.column({ gap = 3, padding = 10, radius = 10, fill = "surface/0.48" }, {
-        row("user", noctalia.tr("panel.profile"), string.format("%s (%d)", tostring(profile.name or "—"), tonumber(profile.index) or 0)),
+        row("user", noctalia.tr("panel.profile"), tostring(profile.name or "—")),
         row("sparkles", noctalia.tr("panel.effect"), tostring(lighting.effect_name or "—")),
         row("sun", noctalia.tr("panel.brightness"), string.format("%d%%", tonumber(lighting.brightness_percent) or 0)),
-        row("gauge", noctalia.tr("panel.speed"), tostring(lighting.speed or 0)),
         row("palette", noctalia.tr("panel.color"), tostring(lighting.color or "—")),
       })
     )
@@ -121,28 +132,25 @@ local function render()
           debounce = tonumber(prefs.debounce_ms) or 0,
           sleep = tonumber(prefs.sleep_seconds) or 0,
         })),
-        row("music", noctalia.tr("panel.music"), noctalia.tr("panel.music_value", {
-          mode = tonumber(state.music and state.music.mode) or 0,
-          sensitivity = tonumber(state.music and state.music.sensitivity) or 0,
-        })),
       })
     )
-    local warnings = data.warnings or {}
-    if #warnings > 0 then
-      local warningRows = {}
-      for index = 1, math.min(#warnings, 3) do
-        table.insert(warningRows, ui.label({
-          text = "• " .. tostring(warnings[index]),
-          fontSize = 10,
-          color = "secondary",
-          maxLines = 3,
-        }))
-      end
-      table.insert(
-        body,
-        ui.column({ gap = 4, padding = 10, radius = 10, fill = "secondary/0.10" }, warningRows)
-      )
+  end
+
+  local warnings = data and data.warnings or {}
+  if #warnings > 0 then
+    local warningRows = {}
+    for index = 1, math.min(#warnings, 2) do
+      table.insert(warningRows, ui.label({
+        text = "• " .. tostring(warnings[index]),
+        fontSize = 10,
+        color = "secondary",
+        maxLines = 3,
+      }))
     end
+    table.insert(
+      body,
+      ui.column({ gap = 4, padding = 10, radius = 10, fill = "secondary/0.10" }, warningRows)
+    )
   end
 
   if lastError ~= nil then
@@ -194,12 +202,8 @@ noctalia.state.watch("f75_status", function(value)
   end
 end)
 
-local function drawOnce()
-  render()
-end
-
 function onOpen(_context)
-  drawOnce()
+  render()
   fetch()
 end
 
@@ -213,4 +217,4 @@ function onOpenAppClicked()
   noctalia.runAsync({ command() })
 end
 
-drawOnce()
+render()

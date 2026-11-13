@@ -24,12 +24,14 @@ struct F75App {
     last_record: f64,
     dirty: bool,
     saved_at: f64,
+    window_title: String,
 }
 
 fn main() {
     let mut screenshot: Option<PathBuf> = None;
     let mut initial_page: Option<usize> = None;
     let mut initial_lang: Option<Lang> = None;
+    let mut shot_size: Option<(usize, usize)> = None;
     let mut status_once = false;
     let mut status_watch = false;
     let mut status_pretty = false;
@@ -59,6 +61,24 @@ fn main() {
                     std::process::exit(2);
                 }
                 screenshot = Some(PathBuf::from(&args[i]));
+            }
+            "--size" => {
+                i += 1;
+                let Some(value) = args.get(i) else {
+                    eprintln!("--size needs WIDTHxHEIGHT, for example 1040x680");
+                    std::process::exit(2);
+                };
+                let parsed = value
+                    .split_once(['x', 'X'])
+                    .and_then(|(w, h)| Some((w.parse::<usize>().ok()?, h.parse::<usize>().ok()?)))
+                    .filter(|(w, h)| (800..=5000).contains(w) && (600..=4000).contains(h));
+                match parsed {
+                    Some(size) => shot_size = Some(size),
+                    None => {
+                        eprintln!("--size needs WIDTHxHEIGHT between 800x600 and 5000x4000");
+                        std::process::exit(2);
+                    }
+                }
             }
             "--page" => {
                 i += 1;
@@ -165,6 +185,7 @@ fn main() {
         last_record: 0.0,
         dirty: false,
         saved_at: 0.0,
+        window_title: String::new(),
     };
     // Real permission state at startup: the top bar can then say NO ACCESS
     // instead of pretending the keyboard is ready just because a node exists.
@@ -172,7 +193,8 @@ fn main() {
 
     if let Some(path) = screenshot {
         log::info("app", format!("rendering screenshot {}", path.display()));
-        headless::render(&mut app, &path);
+        let (width, height) = shot_size.unwrap_or((WINDOW_W as usize, WINDOW_H as usize));
+        headless::render(&mut app, &path, width, height);
         log::info("app", "screenshot finished");
         return;
     }
@@ -181,6 +203,7 @@ fn main() {
         viewport: ViewportBuilder::default()
             .with_inner_size([WINDOW_W, WINDOW_H])
             .with_min_inner_size([1040.0, 680.0])
+            .with_app_id("f75-control")
             .with_title(APP_NAME),
         ..Default::default()
     };
@@ -236,16 +259,21 @@ impl F75App {
                 top: 16,
                 bottom: 12,
             }))
-            .show(root, |ui| match self.state.page {
-                0 => pages::lighting(ui, &mut self.state, &mut self.view, now as f32),
-                1 => pages::keys_page(ui, &mut self.state, &mut self.view, now as f32),
-                2 => pages::macros_page(ui, &mut self.state, &mut self.view, now as f32),
-                3 => pages::music_page(ui, &mut self.state, &mut self.view, now as f32),
-                4 => pages::profiles_page(ui, &mut self.state, &mut self.view, now as f32),
-                5 => pages::settings_page(ui, &mut self.state, &mut self.view, now as f32),
-                6 => pages::device_page(ui, &mut self.state, &mut self.view, now as f32),
-                7 => pages::log_page(ui, &mut self.state, &mut self.view, now as f32),
-                _ => pages::docs_page(ui, &mut self.state, &mut self.view, now as f32),
+            .show(root, |ui| {
+                // niri tiles the window to the column width, which on a 4K
+                // output is much wider than the 1200 px design. Keep the page
+                // readable and centred instead of stretching it to the edge.
+                centered(ui, 1180.0, |ui| match self.state.page {
+                    0 => pages::lighting(ui, &mut self.state, &mut self.view, now as f32),
+                    1 => pages::keys_page(ui, &mut self.state, &mut self.view, now as f32),
+                    2 => pages::macros_page(ui, &mut self.state, &mut self.view, now as f32),
+                    3 => pages::music_page(ui, &mut self.state, &mut self.view, now as f32),
+                    4 => pages::profiles_page(ui, &mut self.state, &mut self.view, now as f32),
+                    5 => pages::settings_page(ui, &mut self.state, &mut self.view, now as f32),
+                    6 => pages::device_page(ui, &mut self.state, &mut self.view, now as f32),
+                    7 => pages::log_page(ui, &mut self.state, &mut self.view, now as f32),
+                    _ => pages::docs_page(ui, &mut self.state, &mut self.view, now as f32),
+                });
             });
 
         pages::file_dialog(&ctx, &mut self.state, &mut self.view, now);
@@ -255,6 +283,30 @@ impl F75App {
         // the spinner moves and the result appears without extra mouse input.
         if self.view.busy() {
             ctx.request_repaint_after(std::time::Duration::from_millis(120));
+        }
+        self.sync_title(&ctx);
+    }
+
+    /// niri, KDE and GNOME list windows by title. Keep it in step with the
+    /// page so a tiled window is identifiable in the overview and in
+    /// screenshots of the window list.
+    fn sync_title(&mut self, ctx: &egui::Context) {
+        const PAGES: [&str; 9] = [
+            "Lighting",
+            "Keys",
+            "Macros",
+            "Music",
+            "Profiles",
+            "Settings",
+            "Device",
+            "Log",
+            "Documentation",
+        ];
+        let page = PAGES.get(self.state.page).copied().unwrap_or("Lighting");
+        let title = format!("F75 Control Center — {page}");
+        if self.window_title != title {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
+            self.window_title = title;
         }
     }
 
@@ -482,6 +534,18 @@ impl F75App {
                             "Keyboard found · no permission — open Device",
                             "Клавиатура найдена · нет прав — откройте «Устройство»",
                         )
+                    } else if matches!(&self.view.last_apply, Some((_, true))) {
+                        tr(
+                            lang,
+                            "Applied to keyboard",
+                            "Применено к клавиатуре",
+                        )
+                    } else if matches!(&self.view.last_apply, Some((_, false))) {
+                        tr(
+                            lang,
+                            "Last apply failed · open Log",
+                            "Последнее применение не удалось · откройте журнал",
+                        )
                     } else {
                         tr(
                             lang,
@@ -691,6 +755,31 @@ fn load_state() -> (AppState, Option<String>) {
             )),
         ),
     }
+}
+
+/// Run `add` inside a column no wider than `max_width`, centred in the
+/// available space. On a narrow tile the column simply takes the full width.
+fn centered<R>(
+    ui: &mut egui::Ui,
+    max_width: f32,
+    add: impl FnOnce(&mut egui::Ui) -> R,
+) -> R {
+    let avail = ui.available_width();
+    let width = avail.min(max_width);
+    let pad = ((avail - width) * 0.5).max(0.0);
+    if pad < 0.5 {
+        return add(ui);
+    }
+    ui.horizontal_top(|ui| {
+        ui.add_space(pad);
+        ui.allocate_ui_with_layout(
+            vec2(width, ui.available_height()),
+            Layout::top_down(Align::Min),
+            add,
+        )
+        .inner
+    })
+    .inner
 }
 
 fn update_autostart(enabled: bool) {

@@ -5,7 +5,7 @@ edition = "2021"
 description = "Open control center for the AULA F75 keyboard"
 
 [dependencies]
-eframe = { version = "0.37", default-features = false, features = ["glow", "default_fonts", "x11", "wayland", "clipboard"] }
+eframe = { version = "0.37", default-features = false, features = ["glow", "default_fonts", "x11", "wayland", "clipboard", "accesskit"] }
 image = { version = "0.25", default-features = false, features = ["png"] }
 libc = "0.2"
 serde = { version = "1", features = ["derive"] }

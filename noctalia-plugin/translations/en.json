@@ -39,7 +39,7 @@
     },
     "open_app_on_click": {
       "label": "Open app on click",
-      "description": "Launch F75 Control Center when the widget is clicked; otherwise the click refreshes the snapshot."
+      "description": "Launch the app on click; otherwise a click opens the details panel."
     }
   },
   "widget": {
@@ -52,11 +52,14 @@
     "write_ok": "Settings can be written",
     "write_limited": "Read-only: the 2.4 GHz receiver drops settings writes; use the USB cable",
     "profile": "Profile: {name} (#{index})",
-    "effect": "Effect: {name} · {brightness}% · speed {speed}",
+    "effect": "Effect: {name} · {brightness}%",
     "color": "Color: {value}",
     "keys": "Remapped keys: {remapped} (+{fn} on FN) of {count}",
     "macros": "Macros: {count} ({steps} steps)",
-    "power": "Debounce {debounce} ms · sleep {sleep} s"
+    "power": "Debounce {debounce} ms · sleep {sleep} s",
+    "access_ok": "Settings access available",
+    "access_denied": "No keyboard access — open the app",
+    "access_error": "Keyboard access error"
   },
   "panel": {
     "waiting": "Waiting for the first snapshot…",
@@ -81,6 +84,10 @@
     "music": "Music mode",
     "music_value": "mode {mode} · sensitivity {sensitivity}",
     "refresh": "Refresh",
-    "open_app": "Open app"
+    "open_app": "Open app",
+    "access_ok": "Settings access available",
+    "access_denied": "No permission for the keyboard. Open the app → Device → Allow access.",
+    "access_error": "Could not talk to the keyboard. Open the log in the app.",
+    "writes_limited_hint": "The 2.4 GHz receiver is read-only. Connect the USB cable to change lighting and keys."
   }
 }

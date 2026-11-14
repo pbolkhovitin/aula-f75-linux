@@ -1,0 +1,47 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install window and input libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libx11-dev libxcursor-dev libxrandr-dev libxi-dev \
+            libxkbcommon-dev libwayland-dev libgl1-mesa-dev \
+            pkg-config
+
+      - name: Test
+        run: cargo test --all-targets
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Render screenshots
+        run: |
+          ./target/release/f75-control --screenshot shots/ci-1200.png
+          ./target/release/f75-control --screenshot shots/ci-1040.png --size 1040x680 --page keys
+          ./target/release/f75-control --screenshot shots/ci-1800.png --size 1800x900 --page lighting
+          test -s shots/ci-1200.png
+          test -s shots/ci-1040.png
+          test -s shots/ci-1800.png
+
+      - name: Keep screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots/ci-*.png
